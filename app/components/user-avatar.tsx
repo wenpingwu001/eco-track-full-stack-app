@@ -1,4 +1,5 @@
 import { auth, signOut } from "@/auth";
+import { Button } from "@nextui-org/button";
 
 export default async function UserAvatar() {
     const session = await auth();
@@ -15,15 +16,14 @@ export default async function UserAvatar() {
             <p className="m-5">
                 {session.user.email} ({session.user.name})
             </p>
-            <button
+            <Button
                 onClick={async () => {
                     "use server";
                     await signOut();
                 }}
-                className="ml-4 p-2 bg-red-500 text-white rounded"
             >
                 Sign Out
-            </button>
+            </Button>
         </div>
     );
 }
