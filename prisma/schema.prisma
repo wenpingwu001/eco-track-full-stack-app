@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int               @id @default(autoincrement())
+  email            String            @unique
+  name             String?
+  password         String
+  role             Role              @default(USER) // User can have roles like USER, ADMIN
+  activities       Activity[]
+  carbonFootprints CarbonFootprint[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  Leaderboard      Leaderboard[]
+}
+
+model Activity {
+  id              Int               @id @default(autoincrement())
+  name            String // Name of the activity (e.g., "Driving", "Eating Meat", etc.)
+  description     String // Description of the activity
+  carbonEmission  Float // Carbon emission per instance of the activity (kg CO2)
+  userId          Int
+  user            User              @relation(fields: [userId], references: [id])
+  createdAt       DateTime          @default(now())
+  CarbonFootprint CarbonFootprint[]
+}
+
+model CarbonFootprint {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  activityId     Int
+  emissionAmount Float // Amount of CO2 emitted for this specific activity instance
+  date           DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id])
+  activity       Activity @relation(fields: [activityId], references: [id])
+}
+
+model Leaderboard {
+  id             Int   @id @default(autoincrement())
+  userId         Int
+  totalEmissions Float // Total emissions for the user (summed from activities)
+  rank           Int // Leaderboard rank based on total emissions
+  user           User  @relation(fields: [userId], references: [id])
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
